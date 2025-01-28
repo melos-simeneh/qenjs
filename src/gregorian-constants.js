@@ -1,24 +1,23 @@
-const INITIAL_MONTH = 1;
+const INITIAL_MONTH = 0;
 const INITIAL_DAY = 1;
-const INITIAL_HOUR = 1;
+const INITIAL_HOUR = 0;
 const INITIAL_MINUTE = 0;
 const INITIAL_SECOND = 0;
 const INITIAL_MILLISECOND = 0;
 const MAX_YEAR = 9999;
 const MIN_YEAR = 1;
-const MAX_MONTH = 13;
-const MIN_MONTH = 1;
+const MAX_MONTH = 11;
+const MIN_MONTH = 0;
 const MAX_DAY = 30;
 const MIN_DAY = 1;
-const MAX_HOUR = 12;
-const MIN_HOUR = 1;
+const MAX_HOUR = 23;
+const MIN_HOUR = 0;
 const MAX_MINUTE = 59;
 const MIN_MINUTE = 0;
 const MAX_SECOND = 59;
 const MIN_SECOND = 0;
 const MAX_MILLISECOND = 999;
 const MIN_MILLISECOND = 0;
-const HOUR_DIFFERENCE = 6;
 
 module.exports = {
   INITIAL_MONTH,
@@ -41,5 +40,4 @@ module.exports = {
   MIN_SECOND,
   MAX_MILLISECOND,
   MIN_MILLISECOND,
-  HOUR_DIFFERENCE,
 };

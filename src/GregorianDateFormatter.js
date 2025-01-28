@@ -1,74 +1,129 @@
 class GregorianDateFormatter {
-  _pad(number, length = 2) {
-    return !isNaN(number) ? String(number).padStart(length, "0") : number;
-  }
+  static DAY_NAMES = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  static MONTH_NAMES = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
 
-  static format(date, formatString = "dd/MM/YYYY HH:mm:ss.SSS A") {
-    // Create an instance of the class
-    const instance = new GregorianDateFormatter();
-
-    date = date instanceof Date ? date : new Date(date);
-
-    const tokens = {
-      YYYY: date.getFullYear(),
-      YY: date.getFullYear() % 100,
-      MMMM: instance._getMonthName(date),
-      MMM: instance._getMonthName(date, true),
-      MM: instance._pad(date.getMonth() + 1),
-      HH: instance._pad(date.getHours()),
-      H: date.getHours(),
-      hh: instance._pad(date.getHours() % 12 || 12),
-      h: instance._pad(date.getHours() % 12 || 12),
-      DDDD: instance._getDayName(date),
-      DDD: instance._getDayName(date, true),
-      dd: instance._pad(date.getDate()),
-      d: date.getDate(),
-      mm: instance._pad(date.getMinutes()),
-      ss: instance._pad(date.getSeconds()),
-      SSS: instance._pad(date.getMilliseconds(), 3),
-      A: date.getHours() >= 12 ? "PM" : "AM",
-      a: date.getHours() >= 12 ? "pm" : "am",
-    };
-
-    return formatString.replace(
-      /YYYY|YY|MMMM|MMM|MM|DDDD|DDD|HH|H|mm|hh|h|dd|d|ss|SSS|A|a/g,
-      (match) => tokens[match]
+  // Check if an object is a valid GregorianDate instance
+  isGregorianDateObject(obj) {
+    return (
+      obj &&
+      obj.$d instanceof Date &&
+      typeof obj.$y === "number" &&
+      typeof obj.$M === "number" &&
+      typeof obj.$D === "number"
     );
   }
 
-  // Get full day name (e.g., "Monday")
-  _getDayName(date, abbr = false) {
-    const days = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    const day = days[date.getDay()];
-    return abbr ? day.slice(0, 3) : day;
+  // Format the input date according to the format string
+  static format(input, formatString = "YYYY-MM-ddTHH:mm:ssZ") {
+    const instance = new GregorianDateFormatter();
+    const isGregorianDate = instance.isGregorianDateObject(input);
+
+    // Validate input
+    if (
+      isGregorianDate &&
+      Object.values(input).some((component) => isNaN(component))
+    ) {
+      return "Invalid Date";
+    }
+
+    const date = isGregorianDate ? input : new Date(input);
+    const timeZoneOffset = isGregorianDate
+      ? input.$d.getTimezoneOffset()
+      : date.getTimezoneOffset();
+    const timeZone = instance.formatTimeZoneOffset(timeZoneOffset);
+
+    // Generate tokens and replace placeholders
+    const tokens = instance._generateTokens(date, isGregorianDate);
+    return formatString.replace(
+      /YYYY|YY|MMMM|MMM|MM|DDDD|DDD|HH|H|mm|hh|h|dd|d|ss|SSS|A|a|Z/g,
+      (match) => tokens[match] || match
+    );
   }
 
-  // Get full month name (e.g., "January")
-  _getMonthName(date, abbr = false) {
-    const months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-    const month = months[date.getMonth()];
-    return abbr ? month.slice(0, 3) : month;
+  // Format time zone offset
+  formatTimeZoneOffset(offset) {
+    const sign = offset > 0 ? "-" : "+";
+    const hours = String(Math.abs(Math.floor(offset / 60))).padStart(2, "0");
+    const minutes = String(Math.abs(offset % 60)).padStart(2, "0");
+    return `${sign}${hours}:${minutes}`;
+  }
+
+  // Generate tokens for formatting
+  _generateTokens(date, isGregorianDate) {
+    const year = isGregorianDate ? date.$y : date.getFullYear();
+    const month = isGregorianDate ? date.$M : date.getMonth();
+    const day = isGregorianDate ? date.$D : date.getDate();
+    const hours = isGregorianDate ? date.$H : date.getHours();
+    const minutes = isGregorianDate ? date.$m : date.getMinutes();
+    const seconds = isGregorianDate ? date.$s : date.getSeconds();
+    const milliseconds = isGregorianDate ? date.$ms : date.getMilliseconds();
+    const dayOfWeek = isGregorianDate ? date.$W : date.getDay();
+
+    const pad = (num, length = 2) =>
+      !isNaN(num) ? String(num).padStart(length, "0") : num;
+
+    const isPM = hours >= 12;
+    const ampm = isPM ? "PM" : "AM";
+    const ampmLower = ampm.toLowerCase();
+    const twelveHour = hours % 12 || 12;
+
+    return {
+      YYYY: year,
+      YY: pad(year % 100),
+      MMMM: this._getMonthName(month),
+      MMM: this._getMonthName(month, true),
+      MM: pad(month + 1),
+      M: month + 1,
+      HH: pad(hours),
+      H: hours,
+      hh: pad(twelveHour),
+      h: twelveHour,
+      DDDD: this._getDayName(dayOfWeek),
+      DDD: this._getDayName(dayOfWeek, true),
+      dd: pad(day),
+      d: day,
+      mm: pad(minutes),
+      ss: pad(seconds),
+      SSS: pad(milliseconds, 3),
+      A: ampm,
+      a: ampmLower,
+      Z: this.formatTimeZoneOffset(
+        isGregorianDate ? date.$d.getTimezoneOffset() : date.getTimezoneOffset()
+      ),
+    };
+  }
+
+  // Get day name
+  _getDayName(day, abbr = false) {
+    const dayName = GregorianDateFormatter.DAY_NAMES[day];
+    return abbr ? dayName.slice(0, 3) : dayName;
+  }
+
+  // Get month name
+  _getMonthName(month, abbr = false) {
+    const monthName = GregorianDateFormatter.MONTH_NAMES[month];
+    return abbr ? monthName.slice(0, 3) : monthName;
   }
 }
 

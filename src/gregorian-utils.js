@@ -1,4 +1,4 @@
-const constant = require("./constants");
+const constant = require("./gregorian-constants");
 
 const generateInvalidDate = () => ({
   year: NaN,
@@ -10,12 +10,44 @@ const generateInvalidDate = () => ({
   milliseconds: NaN,
 });
 
-const isLeapYear = (year) => {
-  return year % 4 === 3;
-};
-
 const isValidInRange = (value, min, max) =>
   !isNaN(value) && value >= min && value <= max;
+
+// Function to check if a year is a leap year
+const isLeapYear = (year) => {
+  if (year % 4 === 0) {
+    if (year % 100 === 0) {
+      if (year % 400 === 0) return true; // Divisible by 400
+      return false; // Divisible by 100 but not by 400
+    }
+    return true; // Divisible by 4 but not by 100
+  }
+  return false; // Not divisible by 4
+};
+
+// Function to get the number of days in a given month and year
+const getDaysInMonth = (month, year) => {
+  const daysInMonth = [
+    31, // January
+    28, // February (28 or 29 depending on leap year)
+    31, // March
+    30, // April
+    31, // May
+    30, // June
+    31, // July
+    31, // August
+    30, // September
+    31, // October
+    30, // November
+    31, // December
+  ];
+
+  if (month === 2 && isLeapYear(year)) {
+    return 29; // February in a leap year has 29 days
+  }
+
+  return daysInMonth[month];
+};
 
 const parseTime = (timeString) => {
   const [time, millisecondPart] = timeString.trim().split(".");
@@ -25,7 +57,6 @@ const parseTime = (timeString) => {
     seconds = constant.INITIAL_SECOND,
   ] = time.split(":").map(Number);
 
-  // Use constants for min/max values of hours, minutes, and seconds
   if (
     !isValidInRange(hours, constant.MIN_HOUR, constant.MAX_HOUR) ||
     !isValidInRange(minutes, constant.MIN_MINUTE, constant.MAX_MINUTE) ||
@@ -50,7 +81,7 @@ const parseTime = (timeString) => {
   return { hours, minutes, seconds, milliseconds };
 };
 
-exports.parseEthiopianDateStringAndReturnDate = (dateString) => {
+exports.parseDateStringAndReturnDate = (dateString) => {
   const normalizedString = dateString.trim().replace(/\s+/g, " ");
   const [datePart, timePart] = normalizedString.split(" ");
 
@@ -63,9 +94,7 @@ exports.parseEthiopianDateStringAndReturnDate = (dateString) => {
   if (
     !isValidInRange(year, constant.MIN_YEAR, constant.MAX_YEAR) ||
     !isValidInRange(month, constant.MIN_MONTH, constant.MAX_MONTH) ||
-    (month == 13 && isLeapYear(year) && day > 6) ||
-    (month == 13 && !isLeapYear(year) && day > 5) ||
-    !isValidInRange(day, constant.MIN_DAY, constant.MAX_DAY)
+    !isValidInRange(day, constant.MIN_DAY, getDaysInMonth(month, year))
   ) {
     return generateInvalidDate();
   }
@@ -86,7 +115,7 @@ exports.parseEthiopianDateStringAndReturnDate = (dateString) => {
   return { year, month, day, ...time };
 };
 
-exports.validateEthiopianDate = (date) => {
+exports.validateDate = (date) => {
   const {
     year,
     month = constant.INITIAL_MONTH,
@@ -97,10 +126,16 @@ exports.validateEthiopianDate = (date) => {
     milliseconds = constant.INITIAL_MILLISECOND,
   } = date;
 
+  const monthZero = month >= 1 && month <= 12 ? month - 1 : month;
+
   const validations = [
     { value: year, min: constant.MIN_YEAR, max: constant.MAX_YEAR },
-    { value: month, min: constant.MIN_MONTH, max: constant.MAX_MONTH },
-    { value: day, min: constant.MIN_DAY, max: constant.MAX_DAY },
+    {
+      value: monthZero,
+      min: constant.MIN_MONTH,
+      max: constant.MAX_MONTH,
+    },
+    { value: day, min: constant.MIN_DAY, max: getDaysInMonth(monthZero, year) },
     { value: hours, min: constant.MIN_HOUR, max: constant.MAX_HOUR },
     { value: minutes, min: constant.MIN_MINUTE, max: constant.MAX_MINUTE },
     { value: seconds, min: constant.MIN_SECOND, max: constant.MAX_SECOND },
@@ -115,5 +150,13 @@ exports.validateEthiopianDate = (date) => {
     if (!isValidInRange(value, min, max)) return generateInvalidDate();
   }
 
-  return { year, month, day, hours, minutes, seconds, milliseconds };
+  return {
+    year,
+    month: monthZero,
+    day,
+    hours,
+    minutes,
+    seconds,
+    milliseconds,
+  };
 };

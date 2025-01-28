@@ -1,13 +1,11 @@
-const EthiopianDateConverter = require("./EthiopianDateConverter");
-const EthiopianDateFormatter = require("./EthiopianDateFormatter");
+const GregorianDateFormatter = require("./GregorianDateFormatter");
 
-class EthiopianDate {
+class GregorianDate {
   $d;
   $y;
   $M;
   $D;
   $W;
-  $N;
   $H;
   $m;
   $s;
@@ -15,21 +13,19 @@ class EthiopianDate {
   $DWM;
   $DWY;
 
-  constructor(input, isNight = false) {
-    this.$N = isNight;
+  constructor(input) {
     if (input instanceof Date) {
       this.$d = input;
-      const ethiopianDate = EthiopianDateConverter.toEthiopianDate(input);
-      this.$y = ethiopianDate.year;
-      this.$M = ethiopianDate.month;
-      this.$D = ethiopianDate.day;
-      this.$W = this.$d.getDay();
-      this.$H = (input.getHours() - 6 + 12) % 12 || 12;
+      this.$y = input.getFullYear();
+      this.$M = input.getMonth();
+      this.$D = input.getDate();
+      this.$W = input.getDay();
+      this.$H = input.getHours();
       this.$m = input.getMinutes();
       this.$s = input.getSeconds();
       this.$ms = input.getMilliseconds();
-      this.$DWM = Math.ceil(this.$D / 8);
-      this.$DWY = this.calculateDayWeekInYear();
+      this.$DWM = this.getWeekOfMonth();
+      this.$DWY = this.getWeekOfYear();
     } else {
       this.$y = input.year;
       this.$M = input.month;
@@ -40,8 +36,8 @@ class EthiopianDate {
       this.$ms = input.milliseconds;
       this.$d = this.getGregorianDateTime();
       this.$W = this.$d.getDay();
-      this.$DWM = Math.ceil(this.$D / 8);
-      this.$DWY = this.calculateDayWeekInYear();
+      this.$DWM = this.getWeekOfMonth();
+      this.$DWY = this.getWeekOfYear();
     }
   }
 
@@ -50,7 +46,7 @@ class EthiopianDate {
   }
 
   get Month() {
-    return this.$m;
+    return this.$M;
   }
 
   get Day() {
@@ -82,34 +78,27 @@ class EthiopianDate {
   }
 
   get getDayWeekInMonth() {
-    return Math.ceil(this.$D / 8);
+    return this.getWeekOfMonth();
   }
 
   get getDayWeekInYear() {
-    return calculateDayWeekInYear();
-  }
-  isLeapYear(year) {
-    return year % 4 === 3;
+    return this.getWeekOfYear();
   }
 
-  calculateDayWeekInYear() {
-    const daysInMonth = Array(12)
-      .fill(30)
-      .concat(this.isLeapYear(this.$y) ? 6 : 5);
-    const dayOfYear =
-      daysInMonth.slice(0, this.$M - 1).reduce((sum, days) => sum + days, 0) +
-      this.$D;
-
-    return Math.ceil(dayOfYear / 7);
+  getWeekOfMonth() {
+    return Math.ceil(this.$D / 7);
   }
+
+  getWeekOfYear() {
+    const startDate = new Date(this.$y, 0, 1);
+    const diff = this.$d - startDate;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    return Math.ceil((days + 1) / 7);
+  }
+
   getGregorianDateTime() {
-    const datetime = EthiopianDateConverter.toGregorianDate(
-      this.$y,
-      this.$M,
-      this.$D
-    );
-    const hour = this.$H + 6 + (this.$N ? 12 : 0);
-    datetime.setHours(hour, this.$m, this.$s, this.$ms);
+    const datetime = new Date(this.$y, this.$M, this.$D);
+    datetime.setHours(this.$H, this.$m, this.$s, this.$ms);
     return datetime;
   }
 
@@ -121,9 +110,16 @@ class EthiopianDate {
     const MS_PER_MONTH = MS_PER_DAY * 30.44;
     const MS_PER_YEAR = MS_PER_DAY * 365.25; // Account for leap years
 
-    const gregorianDate1 = date1.toGregorianDate();
-    const gregorianDate2 = date2.toGregorianDate();
-    const diffInMs = Math.abs(gregorianDate2 - gregorianDate1);
+    const timestamp1 =
+      date1 instanceof GregorianDate
+        ? date1.$d.getTime()
+        : new Date(date1).getTime();
+    const timestamp2 =
+      date2 instanceof GregorianDate
+        ? date2.$d.getTime()
+        : new Date(date2).getTime();
+
+    const diffInMs = Math.abs(timestamp1 - timestamp2);
 
     const normalizedUnit = unit.toLowerCase().replace(/s$/, "");
 
@@ -170,10 +166,13 @@ class EthiopianDate {
 
   static differenceString(date1, date2) {
     const { years, months, days, hours, minutes, seconds } =
-      EthiopianDate.difference(date1, date2);
+      GregorianDate.difference(date1, date2);
     return `${years} years, ${months} months, ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
   }
 
+  diff(date, unit = "") {
+    return GregorianDate.difference(this.$d, date, unit);
+  }
   // Add / Subtract Years, Months, Days
   addYears(years) {
     const date = {
@@ -186,16 +185,16 @@ class EthiopianDate {
       milliseconds: this.$ms,
     };
 
-    return new EthiopianDate(date);
+    return new GregorianDate(date);
   }
 
   addMonths(months) {
     let newMonth = this.$M + months;
     let newYear = this.$y;
 
-    while (newMonth > 13) {
-      newYear += Math.floor(newMonth / 13);
-      newMonth = newMonth % 13;
+    while (newMonth > 12) {
+      newYear += Math.floor(newMonth / 12);
+      newMonth = newMonth % 12;
     }
 
     const date = {
@@ -208,37 +207,41 @@ class EthiopianDate {
       milliseconds: this.$ms,
     };
 
-    return new EthiopianDate(date);
+    return new GregorianDate(date);
   }
 
   addDays(days) {
     const gregorianDate = this.toGregorianDate();
     gregorianDate.setDate(gregorianDate.getDate() + days);
-    return new EthiopianDate(gregorianDate);
+    return new GregorianDate(gregorianDate);
   }
 
   addHours(hours) {
     const gregorianDate = this.toGregorianDate();
     gregorianDate.setHours(gregorianDate.getHours() + hours);
-    return new EthiopianDate(gregorianDate);
+    return new GregorianDate(gregorianDate);
   }
+
   addMinutes(minutes) {
     const gregorianDate = this.toGregorianDate();
     gregorianDate.setMinutes(gregorianDate.getMinutes() + minutes);
-    return new EthiopianDate(gregorianDate);
+    return new GregorianDate(gregorianDate);
   }
+
   addSeconds(seconds) {
     const gregorianDate = this.toGregorianDate();
     gregorianDate.setSeconds(gregorianDate.getSeconds() + seconds);
-    return new EthiopianDate(gregorianDate);
+    return new GregorianDate(gregorianDate);
   }
+
   addMilliseconds(milliseconds) {
     const gregorianDate = this.toGregorianDate();
     gregorianDate.setMilliseconds(
       gregorianDate.getMilliseconds() + milliseconds
     );
-    return new EthiopianDate(gregorianDate);
+    return new GregorianDate(gregorianDate);
   }
+
   add(amount, unit) {
     if (!Number.isInteger(amount)) {
       return "Invalid amount";
@@ -276,12 +279,15 @@ class EthiopianDate {
   subtractDays(days) {
     return this.addDays(-days);
   }
+
   subtractHours(hours) {
     return this.addHours(-hours);
   }
+
   subtractMinutes(minutes) {
     return this.addMinutes(-minutes);
   }
+
   subtractSeconds(seconds) {
     return this.addSeconds(-seconds);
   }
@@ -294,44 +300,51 @@ class EthiopianDate {
   startOfDay() {
     const startOfDayDate = new Date(this.$d);
     startOfDayDate.setHours(0, 0, 0, 0);
-    return new EthiopianDate(startOfDayDate);
+    return new GregorianDate(startOfDayDate);
   }
 
   // End of the day (23:59:59.999)
   endOfDay() {
     const endOfDayDate = new Date(this.$d);
     endOfDayDate.setHours(23, 59, 59, 999);
-    return new EthiopianDate(endOfDayDate);
+    return new GregorianDate(endOfDayDate);
   }
 
+  _getTimestamp(date) {
+    if (date instanceof Date) {
+      return date.getTime();
+    } else if (date instanceof GregorianDate) {
+      return date.$d.getTime();
+    } else {
+      return null; // Indicates invalid date
+    }
+  }
   // Comparison Methods
   isBefore(date) {
-    return this.toGregorianDate() < date.toGregorianDate();
+    const compareTimestamp = this._getTimestamp(date);
+    if (compareTimestamp === null) return false;
+    return this.$d.getTime() < compareTimestamp;
   }
 
   isAfter(date) {
-    return this.toGregorianDate() > date.toGregorianDate();
+    const compareTimestamp = this._getTimestamp(date);
+    if (compareTimestamp === null) return false;
+    return this.$d.getTime() > compareTimestamp;
   }
 
   isSame(date) {
-    return (
-      this.toGregorianDate().getTime() === date.toGregorianDate().getTime()
-    );
+    const compareTimestamp = this._getTimestamp(date);
+    if (compareTimestamp === null) return false;
+    return this.$d.getTime() === compareTimestamp;
   }
 
-  // Format Date using EthiopianDateFormatter
-  toString(format = "dd/MM/YYYY", lang = "") {
-    return EthiopianDateFormatter.format(this, format, lang);
+  // Format Date (to simple string format)
+  toString(format = "dd/MM/YYYY") {
+    return GregorianDateFormatter.format(this, format);
   }
-
-  format(template, lang) {
-    return EthiopianDateFormatter.format(this, template, lang);
-  }
-
-  // Convert EthiopianDate to Gregorian Date
-  toGregorianDate() {
-    return new Date(this.$d);
+  format(template) {
+    return GregorianDateFormatter.format(this, template);
   }
 }
 
-module.exports = EthiopianDate;
+module.exports = GregorianDate;
