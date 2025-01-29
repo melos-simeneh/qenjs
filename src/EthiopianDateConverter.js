@@ -7,13 +7,17 @@ class EthiopianDateConverter {
   }
 
   static toJDN(date) {
-    let a, y, m;
-    a = Math.floor((14 - date.getMonth() + 1) / 12);
-    y = date.getFullYear() + 4800 - a;
-    m = date.getMonth() + 1 + 12 * a - 3;
+    // Use UTC methods to get the correct year, month, and day
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth() + 1; // getUTCMonth() returns 0-11
+    const day = date.getUTCDate();
+
+    let a = Math.floor((14 - month) / 12);
+    let y = year + 4800 - a;
+    let m = month + 12 * a - 3;
 
     return (
-      date.getDate() +
+      day +
       Math.floor((153 * m + 2) / 5) +
       365 * y +
       Math.floor(y / 4) -
@@ -60,7 +64,7 @@ class EthiopianDateConverter {
     month = month + 2 - 12 * r;
     year = 100 * (n - 49) + year + r;
 
-    return new Date(year, month - 1, day); // Month is zero-indexed in JS Date
+    return new Date(Date.UTC(year, month - 1, day)); // Use Date.UTC to create a UTC date
   }
 
   static validate(year, month, day) {
@@ -90,4 +94,5 @@ class EthiopianDateConverter {
     );
   }
 }
+
 module.exports = EthiopianDateConverter;

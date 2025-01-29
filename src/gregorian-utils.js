@@ -1,5 +1,6 @@
 const constant = require("./gregorian-constants");
 
+// Helper to generate an invalid date object
 const generateInvalidDate = () => ({
   year: NaN,
   month: NaN,
@@ -10,45 +11,22 @@ const generateInvalidDate = () => ({
   milliseconds: NaN,
 });
 
+// Helper to check if a value is within a range
 const isValidInRange = (value, min, max) =>
   !isNaN(value) && value >= min && value <= max;
 
-// Function to check if a year is a leap year
-const isLeapYear = (year) => {
-  if (year % 4 === 0) {
-    if (year % 100 === 0) {
-      if (year % 400 === 0) return true; // Divisible by 400
-      return false; // Divisible by 100 but not by 400
-    }
-    return true; // Divisible by 4 but not by 100
-  }
-  return false; // Not divisible by 4
-};
+// Helper to check if a year is a leap year
+const isLeapYear = (year) =>
+  (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 
-// Function to get the number of days in a given month and year
+// Helper to get the number of days in a month for a given year
 const getDaysInMonth = (month, year) => {
-  const daysInMonth = [
-    31, // January
-    28, // February (28 or 29 depending on leap year)
-    31, // March
-    30, // April
-    31, // May
-    30, // June
-    31, // July
-    31, // August
-    30, // September
-    31, // October
-    30, // November
-    31, // December
-  ];
-
-  if (month === 2 && isLeapYear(year)) {
-    return 29; // February in a leap year has 29 days
-  }
-
-  return daysInMonth[month];
+  const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (month === 2 && isLeapYear(year)) return 29; // February in a leap year
+  return daysInMonth[month - 1]; // Months are 1-indexed
 };
 
+// Helper to parse a time string (e.g., "12:34:56.789")
 const parseTime = (timeString) => {
   const [time, millisecondPart] = timeString.trim().split(".");
   const [
@@ -68,6 +46,7 @@ const parseTime = (timeString) => {
   const milliseconds = millisecondPart
     ? parseInt(millisecondPart, 10)
     : constant.INITIAL_MILLISECOND;
+
   if (
     !isValidInRange(
       milliseconds,
@@ -81,9 +60,11 @@ const parseTime = (timeString) => {
   return { hours, minutes, seconds, milliseconds };
 };
 
-exports.parseDateStringAndReturnDate = (dateString) => {
+// Main function to parse a date string (e.g., "2023-10-05 12:34:56.789")
+const parseDateString = (dateString) => {
   const normalizedString = dateString.trim().replace(/\s+/g, " ");
-  const [datePart, timePart] = normalizedString.split(" ");
+  const [datePart, timePartString] = normalizedString.split(/[ T]/);
+  const timePart = timePartString.trim().replace(/Z$/, "");
 
   const [year, month = constant.INITIAL_MONTH, day = constant.INITIAL_DAY] =
     datePart
@@ -115,7 +96,8 @@ exports.parseDateStringAndReturnDate = (dateString) => {
   return { year, month, day, ...time };
 };
 
-exports.validateDate = (date) => {
+// Main function to validate a date object
+const validateDate = (date) => {
   const {
     year,
     month = constant.INITIAL_MONTH,
@@ -130,12 +112,8 @@ exports.validateDate = (date) => {
 
   const validations = [
     { value: year, min: constant.MIN_YEAR, max: constant.MAX_YEAR },
-    {
-      value: monthZero,
-      min: constant.MIN_MONTH,
-      max: constant.MAX_MONTH,
-    },
-    { value: day, min: constant.MIN_DAY, max: getDaysInMonth(monthZero, year) },
+    { value: monthZero, min: constant.MIN_MONTH, max: constant.MAX_MONTH },
+    { value: day, min: constant.MIN_DAY, max: getDaysInMonth(month, year) },
     { value: hours, min: constant.MIN_HOUR, max: constant.MAX_HOUR },
     { value: minutes, min: constant.MIN_MINUTE, max: constant.MAX_MINUTE },
     { value: seconds, min: constant.MIN_SECOND, max: constant.MAX_SECOND },
@@ -159,4 +137,10 @@ exports.validateDate = (date) => {
     seconds,
     milliseconds,
   };
+};
+
+// Export the main functions
+module.exports = {
+  parseDateString,
+  validateDate,
 };

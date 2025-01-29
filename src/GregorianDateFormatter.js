@@ -23,14 +23,18 @@ class GregorianDateFormatter {
     "December",
   ];
 
-  // Check if an object is a valid GregorianDate instance
   isGregorianDateObject(obj) {
+    if (!obj || !(obj.$d instanceof Date)) {
+      return false;
+    }
+    const { $y, $M, $D, $isGregorianDateObject } = obj;
+
     return (
-      obj &&
-      obj.$d instanceof Date &&
-      typeof obj.$y === "number" &&
-      typeof obj.$M === "number" &&
-      typeof obj.$D === "number"
+      typeof $y === "number" &&
+      typeof $M === "number" &&
+      typeof $D === "number" &&
+      typeof $isGregorianDateObject === "boolean" &&
+      $isGregorianDateObject
     );
   }
 
@@ -38,20 +42,14 @@ class GregorianDateFormatter {
   static format(input, formatString = "YYYY-MM-ddTHH:mm:ssZ") {
     const instance = new GregorianDateFormatter();
     const isGregorianDate = instance.isGregorianDateObject(input);
+    const date = isGregorianDate ? input : new Date(input);
 
-    // Validate input
     if (
-      isGregorianDate &&
-      Object.values(input).some((component) => isNaN(component))
+      !(date instanceof Date) ||
+      (isGregorianDate && Object.values(date).some(isNaN))
     ) {
       return "Invalid Date";
     }
-
-    const date = isGregorianDate ? input : new Date(input);
-    const timeZoneOffset = isGregorianDate
-      ? input.$d.getTimezoneOffset()
-      : date.getTimezoneOffset();
-    const timeZone = instance.formatTimeZoneOffset(timeZoneOffset);
 
     // Generate tokens and replace placeholders
     const tokens = instance._generateTokens(date, isGregorianDate);

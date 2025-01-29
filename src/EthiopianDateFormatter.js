@@ -35,15 +35,7 @@ class EthiopianDateFormatter {
 
   static DAYS_OF_WEEK = {
     ethiopian: ["እሑድ", "ሰኞ", "ማክሰኞ", "ረቡዕ", "ሐሙስ", "ዓርብ", "ቅዳሜ"],
-    english: [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ],
+    english: ["Ehud", "Segno", "Maksegno", "Rebu", "Hamus", "Arb", "Kidame"],
   };
 
   static TIME_OF_DAY_LABELS = {
@@ -54,10 +46,10 @@ class EthiopianDateFormatter {
       night: "ለሊት", // 12 AM - 5 AM
     },
     english: {
-      morning: "Morning", // 6 AM - 11 AM
-      afternoon: "Afternoon", // 12 PM - 5 PM
-      evening: "Evening", // 6 PM - 11 PM
-      night: "Night", // 12 AM - 5 AM
+      morning: "Tewat", // 6 AM - 11 AM
+      afternoon: "Kesaat", // 12 PM - 5 PM
+      evening: "Misht", // 6 PM - 11 PM
+      night: "Leilit", // 12 AM - 5 AM
     },
   };
 
@@ -80,7 +72,6 @@ class EthiopianDateFormatter {
 
   static _getTimeOfDay(hour, language) {
     const lang = EthiopianDateFormatter._getLanguage(language);
-    console.log(lang, language);
     if (hour >= 6 && hour < 12) {
       return EthiopianDateFormatter.TIME_OF_DAY_LABELS[lang].morning;
     } else if (hour >= 12 && hour < 18) {
@@ -91,6 +82,15 @@ class EthiopianDateFormatter {
       return EthiopianDateFormatter.TIME_OF_DAY_LABELS[lang].night;
     }
   }
+  static isInvalidEthiopianDate = (ethiopianDate) => {
+    return (
+      typeof ethiopianDate === "string" ||
+      (typeof ethiopianDate === "object" &&
+        (Object.values(ethiopianDate).some((component) => isNaN(component)) ||
+          !ethiopianDate.hasOwnProperty("$isEthiopianDateObject") ||
+          !ethiopianDate.$isEthiopianDateObject))
+    );
+  };
 
   static format(
     ethiopianDate,
@@ -100,7 +100,7 @@ class EthiopianDateFormatter {
     const pad = (number, length = 2) =>
       !isNaN(number) ? String(number).padStart(length, "0") : number;
 
-    if (Object.values(ethiopianDate).some((component) => isNaN(component))) {
+    if (EthiopianDateFormatter.isInvalidEthiopianDate(ethiopianDate)) {
       return "Invalid Date";
     }
 
@@ -113,7 +113,10 @@ class EthiopianDateFormatter {
       YYYY: pad($y, 4),
       YY: pad($y % 100, 2),
       MMMM: EthiopianDateFormatter.MONTHS[lang][$M - 1],
-      MMM: EthiopianDateFormatter.MONTHS[lang][$M - 1]?.slice(0, 2),
+      MMM: EthiopianDateFormatter.MONTHS[lang][$M - 1]?.slice(
+        0,
+        lang == "english" ? 3 : 2
+      ),
       MM: pad($M),
       M: $M,
       DDDD: EthiopianDateFormatter.DAYS_OF_WEEK[lang][$W],
