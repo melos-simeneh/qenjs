@@ -1,4 +1,5 @@
 const GregorianDateFormatter = require("./GregorianDateFormatter");
+const dateUtils = require("./gregorian-date-diff-utils");
 
 class GregorianDate {
   $d;
@@ -129,76 +130,53 @@ class GregorianDate {
   }
 
   static difference(date1, date2, unit = "") {
-    const MS_PER_SECOND = 1000;
-    const MS_PER_MINUTE = MS_PER_SECOND * 60;
-    const MS_PER_HOUR = MS_PER_MINUTE * 60;
-    const MS_PER_DAY = MS_PER_HOUR * 24;
-    const MS_PER_MONTH = MS_PER_DAY * 30.44;
-    const MS_PER_YEAR = MS_PER_DAY * 365.25; // Account for leap years
-
-    const timestamp1 =
-      date1 instanceof GregorianDate
-        ? date1.$d.getTime()
-        : new Date(date1).getTime();
-    const timestamp2 =
-      date2 instanceof GregorianDate
-        ? date2.$d.getTime()
-        : new Date(date2).getTime();
-
-    const diffInMs = Math.abs(timestamp1 - timestamp2);
-
-    const normalizedUnit = unit.toLowerCase().replace(/s$/, "");
-
-    switch (normalizedUnit) {
-      case "millisecond":
-        return diffInMs % MS_PER_SECOND;
-      case "second":
-        return Math.floor(diffInMs / MS_PER_SECOND) % 60;
-      case "minute":
-        return Math.floor(diffInMs / MS_PER_MINUTE) % 60;
-      case "hour":
-        return Math.floor(diffInMs / MS_PER_HOUR) % 24;
-      case "day":
-        return Math.floor(diffInMs / MS_PER_DAY);
-      case "month":
-        return Math.floor(diffInMs / MS_PER_MONTH);
-      case "year":
-        return Math.floor(diffInMs / MS_PER_YEAR);
-      default:
-        const years = Math.floor(diffInMs / MS_PER_YEAR);
-        const remainingMsAfterYears = diffInMs % MS_PER_YEAR;
-        const months = Math.floor(remainingMsAfterYears / MS_PER_MONTH);
-        const remainingMsAfterMonths = remainingMsAfterYears % MS_PER_MONTH;
-        const days = Math.floor(remainingMsAfterMonths / MS_PER_DAY);
-        const remainingMsAfterDays = remainingMsAfterMonths % MS_PER_DAY;
-        const hours = Math.floor(remainingMsAfterDays / MS_PER_HOUR);
-        const remainingMsAfterHours = remainingMsAfterDays % MS_PER_HOUR;
-        const minutes = Math.floor(remainingMsAfterHours / MS_PER_MINUTE);
-        const remainingMsAfterMinutes = remainingMsAfterHours % MS_PER_MINUTE;
-        const seconds = Math.floor(remainingMsAfterMinutes / MS_PER_SECOND);
-        const milliseconds = remainingMsAfterMinutes % MS_PER_SECOND;
-
-        return {
-          years,
-          months,
-          days,
-          hours,
-          minutes,
-          seconds,
-          milliseconds,
-        };
-    }
+    date1 = date1 instanceof GregorianDate ? date1.$d : date1;
+    date2 = date2 instanceof GregorianDate ? date2.$d : date2;
+    return dateUtils.difference(date1, date2, unit);
   }
 
-  static differenceString(date1, date2) {
-    const { years, months, days, hours, minutes, seconds } =
-      GregorianDate.difference(date1, date2);
-    return `${years} years, ${months} months, ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+  static differenceString(date1, date2, unit) {
+    const result = GregorianDate.difference(date1, date2, "all");
+
+    if (typeof result === "string") {
+      return result;
+    }
+
+    const timeUnitMapping = {
+      year: result.full,
+      month: result.byMonths,
+      week: result.byWeeks,
+    };
+
+    if (timeUnitMapping[unit]) {
+      return dateUtils.formatTimeParts(timeUnitMapping[unit]);
+    }
+
+    return result.full ? dateUtils.formatTimeParts(result.full) : result;
   }
 
   diff(date, unit = "") {
     return GregorianDate.difference(this.$d, date, unit);
   }
+  diffString(date, unit = "") {
+    return GregorianDate.differenceString(this.$d, date, unit);
+  }
+
+  fromNow(withoutSuffix) {
+    return dateUtils.toRelativeTime(this.$d, new Date(), withoutSuffix);
+  }
+  from(date, withoutSuffix) {
+    date = date instanceof GregorianDate ? date.$d : date;
+    return dateUtils.toRelativeTime(this.$d, date, withoutSuffix);
+  }
+  to(date, withoutSuffix) {
+    date = date instanceof GregorianDate ? date.$d : date;
+    return dateUtils.toRelativeTime(date, this.$d, withoutSuffix);
+  }
+  toNow(withoutSuffix) {
+    return dateUtils.toRelativeTime(new Date(), this.$d, withoutSuffix);
+  }
+
   // Add / Subtract Years, Months, Days
   addYears(years) {
     const date = {

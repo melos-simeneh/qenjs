@@ -43,9 +43,8 @@ class GregorianDateFormatter {
     const instance = new GregorianDateFormatter();
     const isGregorianDate = instance.isGregorianDateObject(input);
     const date = isGregorianDate ? input : new Date(input);
-
     if (
-      !(date instanceof Date) ||
+      (!(date instanceof Date) && !isGregorianDate) ||
       (isGregorianDate && Object.values(date).some(isNaN))
     ) {
       return "Invalid Date";

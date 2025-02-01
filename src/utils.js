@@ -96,7 +96,6 @@ exports.validateEthiopianDate = (date) => {
     seconds = constant.INITIAL_SECOND,
     milliseconds = constant.INITIAL_MILLISECOND,
   } = date;
-
   const validations = [
     { value: year, min: constant.MIN_YEAR, max: constant.MAX_YEAR },
     { value: month, min: constant.MIN_MONTH, max: constant.MAX_MONTH },

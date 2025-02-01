@@ -24,28 +24,38 @@ describe("qenjs Library Tests", () => {
   // Test date formatting
   describe("Date Formatting", () => {
     test("should format date as 'YYYY-MM-dd'", () => {
-      const date = qenjs("2014-07-08");
-      expect(date.format("YYYY-MM-dd")).toBe("2014-07-08");
+      const date = qenjs("2017-07-08");
+      expect(date.format("YYYY-MM-dd")).toBe("2017-07-08");
     });
 
     test("should format date as 'MMMM dd, YYYY' in English", () => {
-      const date = qenjs("2014-07-08");
-      expect(date.format("MMMM dd, YYYY", "eng")).toBe("Megabit 08, 2014");
+      const date = qenjs("2017-07-08");
+      expect(date.format("MMMM dd, YYYY", "eng")).toBe("Megabit 08, 2017");
     });
 
     test("should format date as 'MMM dd, YYYY' in English", () => {
-      const date = qenjs("2014-07-08");
-      expect(date.format("MMM dd, YYYY", "eng")).toBe("Meg 08, 2014");
+      const date = qenjs("2017-07-08");
+      expect(date.format("MMM dd, YYYY", "eng")).toBe("Meg 08, 2017");
+    });
+    test("should format date as 'DDDD, MMM dd YYYY' in English", () => {
+      const date = qenjs("2017-07-08");
+      expect(date.format("DDDD, MMMM dd YYYY", "eng")).toBe(
+        "Segno, Megabit 08 2017"
+      );
+    });
+    test("should format date as 'DDDD, MMMM dd YYYY' in Amharic", () => {
+      const date = qenjs("2017-07-08");
+      expect(date.format("DDDD, MMMM dd YYYY")).toBe("ሰኞ, መጋቢት 08 2017");
     });
   });
 
   // Test date conversion
   describe("Date Conversion", () => {
     test("should convert EthiopianDate to GregorianDate", () => {
-      const ethDate = qenjs("2014-07-08");
+      const ethDate = qenjs("2017-07-08");
       const gregDate = qenjs.toGregorianDate(ethDate);
       expect(gregDate).toBeInstanceOf(Date);
-      expect(gregDate.toISOString()).toBe("2022-03-17T04:00:00.000Z"); // Example conversion
+      expect(gregDate.toISOString()).toBe("2025-03-17T04:00:00.000Z");
     });
 
     test("should convert GregorianDate to EthiopianDate", () => {

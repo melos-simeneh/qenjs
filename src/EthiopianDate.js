@@ -1,5 +1,6 @@
 const EthiopianDateConverter = require("./EthiopianDateConverter");
 const EthiopianDateFormatter = require("./EthiopianDateFormatter");
+const dateUtils = require("./eth-date-diff-util");
 
 class EthiopianDate {
   $d;
@@ -334,114 +335,65 @@ class EthiopianDate {
   toGregorianDate() {
     return new Date(this.$d);
   }
+
   static difference(date1, date2, unit = "") {
-    const MS_PER_SECOND = 1000;
-    const MS_PER_MINUTE = MS_PER_SECOND * 60;
-    const MS_PER_HOUR = MS_PER_MINUTE * 60;
-    const MS_PER_DAY = MS_PER_HOUR * 24;
-    const MS_PER_MONTH = MS_PER_DAY * 30.44;
-    const MS_PER_YEAR = MS_PER_DAY * 365.25; // Account for leap years
+    if (!(date1 instanceof EthiopianDate && date2 instanceof EthiopianDate))
+      return "Invalid Date";
 
-    const gregorianDate1 = date1.toGregorianDate();
-    const gregorianDate2 = date2.toGregorianDate();
-    const diffInMs = Math.abs(gregorianDate2 - gregorianDate1);
+    return dateUtils.difference(date1, date2, unit);
+  }
 
-    const normalizedUnit = unit.toLowerCase().replace(/s$/, "");
+  static differenceString(date1, date2, unit) {
+    unit = unit.toLowerCase().replace(/s$/, "");
 
-    switch (normalizedUnit) {
-      case "millisecond":
-        return diffInMs % MS_PER_SECOND;
-      case "second":
-        return Math.floor(diffInMs / MS_PER_SECOND) % 60;
-      case "minute":
-        return Math.floor(diffInMs / MS_PER_MINUTE) % 60;
-      case "hour":
-        return Math.floor(diffInMs / MS_PER_HOUR) % 24;
-      case "day":
-        return Math.floor(diffInMs / MS_PER_DAY);
-      case "month":
-        return Math.floor(diffInMs / MS_PER_MONTH);
-      case "year":
-        return Math.floor(diffInMs / MS_PER_YEAR);
-      default:
-        const years = Math.floor(diffInMs / MS_PER_YEAR);
-        const remainingMsAfterYears = diffInMs % MS_PER_YEAR;
-        const months = Math.floor(remainingMsAfterYears / MS_PER_MONTH);
-        const remainingMsAfterMonths = remainingMsAfterYears % MS_PER_MONTH;
-        const days = Math.floor(remainingMsAfterMonths / MS_PER_DAY);
-        const remainingMsAfterDays = remainingMsAfterMonths % MS_PER_DAY;
-        const hours = Math.floor(remainingMsAfterDays / MS_PER_HOUR);
-        const remainingMsAfterHours = remainingMsAfterDays % MS_PER_HOUR;
-        const minutes = Math.floor(remainingMsAfterHours / MS_PER_MINUTE);
-        const remainingMsAfterMinutes = remainingMsAfterHours % MS_PER_MINUTE;
-        const seconds = Math.floor(remainingMsAfterMinutes / MS_PER_SECOND);
-        const milliseconds = remainingMsAfterMinutes % MS_PER_SECOND;
+    const result = EthiopianDate.difference(date1, date2, "all");
 
-        return {
-          years,
-          months,
-          days,
-          hours,
-          minutes,
-          seconds,
-          milliseconds,
-        };
+    if (typeof result === "string") {
+      return result;
     }
-  }
 
-  static differenceString(date1, date2) {
-    const { years, months, days, hours, minutes, seconds } =
-      EthiopianDate.difference(date1, date2);
-    return `${years} years, ${months} months, ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
-  }
-  toRelativeTime(referenceDate = new Date()) {
-    const diffInMs = referenceDate - this.$d;
-    const isFuture = diffInMs < 0;
-    const absDiffInMs = Math.abs(diffInMs);
+    const timeUnitMapping = {
+      year: result.full,
+      month: result.byMonths,
+      week: result.byWeeks,
+    };
 
-    const MS_PER_SECOND = 1000;
-    const MS_PER_MINUTE = MS_PER_SECOND * 60;
-    const MS_PER_HOUR = MS_PER_MINUTE * 60;
-    const MS_PER_DAY = MS_PER_HOUR * 24;
-    const MS_PER_MONTH = MS_PER_DAY * 30.44;
-    const MS_PER_YEAR = MS_PER_DAY * 365.25;
-
-    const years = Math.floor(absDiffInMs / MS_PER_YEAR);
-    const months = Math.floor(absDiffInMs / MS_PER_MONTH);
-    const days = Math.floor(absDiffInMs / MS_PER_DAY);
-    const hours = Math.floor(absDiffInMs / MS_PER_HOUR);
-    const minutes = Math.floor(absDiffInMs / MS_PER_MINUTE);
-    const seconds = Math.floor(absDiffInMs / MS_PER_SECOND);
-
-    if (years > 0) {
-      return isFuture
-        ? `in ${years} year${years > 1 ? "s" : ""}`
-        : `${years} year${years > 1 ? "s" : ""} ago`;
-    } else if (months > 0) {
-      return isFuture
-        ? `in ${months} month${months > 1 ? "s" : ""}`
-        : `${months} month${months > 1 ? "s" : ""} ago`;
-    } else if (days > 0) {
-      return isFuture
-        ? `in ${days} day${days > 1 ? "s" : ""}`
-        : `${days} day${days > 1 ? "s" : ""} ago`;
-    } else if (hours > 0) {
-      return isFuture
-        ? `in ${hours} hour${hours > 1 ? "s" : ""}`
-        : `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    } else if (minutes > 0) {
-      return isFuture
-        ? `in ${minutes} minute${minutes > 1 ? "s" : ""}`
-        : `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-    } else {
-      return isFuture
-        ? `in ${seconds} second${seconds > 1 ? "s" : ""}`
-        : `${seconds} second${seconds > 1 ? "s" : ""} ago`;
+    if (timeUnitMapping[unit]) {
+      return dateUtils.formatTimeParts(timeUnitMapping[unit]);
     }
+
+    return result.full ? dateUtils.formatTimeParts(result.full) : result;
   }
 
-  fromNow() {
-    return this.toRelativeTime(new Date());
+  diff(date, unit = "") {
+    return EthiopianDate.difference(this, date, unit);
+  }
+
+  diffString(date, unit = "") {
+    return EthiopianDate.differenceString(this, date, unit);
+  }
+
+  fromNow(withoutSuffix) {
+    return dateUtils.toRelativeTime(
+      this,
+      new EthiopianDate(new Date()),
+      withoutSuffix
+    );
+  }
+  from(date, withoutSuffix) {
+    if (!(date instanceof EthiopianDate)) return "Invalid Date";
+    return dateUtils.toRelativeTime(this, date, withoutSuffix);
+  }
+  to(date, withoutSuffix) {
+    if (!(date instanceof EthiopianDate)) return "Invalid Date";
+    return dateUtils.toRelativeTime(date, this, withoutSuffix);
+  }
+  toNow(withoutSuffix) {
+    return dateUtils.toRelativeTime(
+      new EthiopianDate(new Date()),
+      this.$d,
+      withoutSuffix
+    );
   }
 }
 

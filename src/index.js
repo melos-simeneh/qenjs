@@ -133,13 +133,30 @@ qenjs.format = function (date, formatString) {
 qenjs.diff = function (date1, date2, unit = "") {
   try {
     if (date1 instanceof EthiopianDate && date2 instanceof EthiopianDate) {
-      return EthiopianDate.difference(date1, date2);
+      return EthiopianDate.difference(date1, date2, unit);
     }
     if (
       (date1 instanceof Date || date1 instanceof GregorianDate) &&
       (date2 instanceof Date || date2 instanceof GregorianDate)
     ) {
       return GregorianDate.difference(date1, date2, unit);
+    }
+    throw new InvalidDateError("Invalid Date");
+  } catch (error) {
+    return error.message;
+  }
+};
+
+qenjs.diffString = function (date1, date2, unit = "year") {
+  try {
+    if (date1 instanceof EthiopianDate && date2 instanceof EthiopianDate) {
+      return EthiopianDate.differenceString(date1, date2, unit);
+    }
+    if (
+      (date1 instanceof Date || date1 instanceof GregorianDate) &&
+      (date2 instanceof Date || date2 instanceof GregorianDate)
+    ) {
+      return GregorianDate.differenceString(date1, date2, unit);
     }
     throw new InvalidDateError("Invalid Date");
   } catch (error) {
