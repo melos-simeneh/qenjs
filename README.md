@@ -27,10 +27,11 @@ yarn add qenjs
 
 Here's how you can start using MiniDayjs in your project:
 
-1. Create Ethiopian Date
-    You can create an Ethiopian date using the following methods:
+### 1. Create Ethiopian Date
 
-    ```javascript
+You can create an Ethiopian date using the following methods:
+
+```javascript
     const ethiopianDate = qenjs();
     console.log(ethiopianDate.toString()); // Outputs current ethiopian date
 
@@ -49,13 +50,13 @@ Here's how you can start using MiniDayjs in your project:
     const ethiopianNightDate = qenjs("2017-01-29", { isNight: true });
     console.log(ethiopianNightDate.toString("dd/MM/YYYY HH:mm:ss A")); // 29/01/2017 01:00:00 ምሽት
 
-    ```
+```
 
-2. Formatting Ethiopian Date
+### 2. Formatting Ethiopian Date
   
-    You can format Ethiopian dates using custom patterns. The default language is Amharic, but you can specify another language if needed.
+You can format Ethiopian dates using custom patterns. The default language is Amharic, but you can specify another language if needed.
 
-    ```javascript
+```javascript
         const ethiopianDate = qenjs({ year: 2017, month: 4, day: 15 });
         console.log(ethiopianDate.format("MMMM dd, YYYY", "amh")); // ታኅሣሥ 15, 2017
 
@@ -63,73 +64,75 @@ Here's how you can start using MiniDayjs in your project:
 
         console.log(qenjs.format(ethiopianDate3, "MMMM d, YYYY")); // ታኅሣሥ 15, 2017
 
-    ```
+```
 
-3. Adding/Subtracting Days
+### 3. Adding/Subtracting Days
 
-   You can manipulate Ethiopian dates by adding or subtracting days.
+You can manipulate Ethiopian dates by adding or subtracting days.
 
-    Example: Adding Days
+Example: Adding Days
 
-    ```javascript
+```javascript
     const ethiopianDate = qenjs(2017, 1, 1);
     const newDate = ethiopianDate.addDays(700);
     console.log(newDate.toString("DDDD, MMMM dd, YYYY")); // Add 700 days to the date
-    ```
+```
 
-    Example: Subtracting Days
+Example: Subtracting Days
 
-    ```javascript
+```javascript
     const ethiopianDate = qenjs(2017, 1, 1);
     const previousDate = ethiopianDate.subtractDays(5);
     console.log(previousDate.toString()); // Subtract 5 days from the date
-    ```
+```
 
-4. Comparing Dates
+### 4. Comparing Dates
 
-    QENJS provides methods to compare Ethiopian dates (e.g., checking if a date is before or after another date).
+QENJS provides methods to compare Ethiopian dates (e.g., checking if a date is before or after another date).
 
-    Example: Check if Date is Before
+Example: Check if Date is Before
 
-    ```javascript
+```javascript
     const date1 = qenjs(2025, 1, 29);
     const date2 = qenjs(2024, 1, 29);
     console.log(date1.isBefore(date2)); // Should print false
     console.log(date1.isAfter(date2)); // Should print false
     console.log(date1.isSame(date2)); // Should print true
-    ```
+```
 
-5. Converting to Gregorian Date
+### 5. Converting to Gregorian Date
 
-    QENJS supports converting Ethiopian dates to Gregorian dates.
+QENJS supports converting Ethiopian dates to Gregorian dates.
 
-    Example: Convert Ethiopian Date to Gregorian Date
+Example: Convert Ethiopian Date to Gregorian Date
 
-    ```javascript
+```javascript
     const ethiopianDate = qenjs({ year: 2017, month: 4, day: 15 });
     const gregorianDate = qenjs.toGregorianDate(ethiopianDate);
     console.log(gregorianDate.toISOString()); // Outputs the Gregorian equivalent
-    ```
+```
 
-6. Relative Time
-    QENJS supports relative time, showing how much time has passed since or until a certain date.
+### 6. Relative Time
 
-    Example: Get Relative Time
+QENJS supports relative time, showing how much time has passed since or until a certain date.
 
-    ```javascript
+Example: Get Relative Time
+
+```javascript
     Copy
     const ethiopianDate = qenjs(2017, 4, 15);
     console.log(ethiopianDate.fromNow()); // Outputs relative time like "X days ago" 
-    ```
+```
 
-7. Date Differences
-    QENJS provides methods to calculate the difference between two Ethiopian dates.
+### 7. Date Differences
 
-    Example: Date Difference
+QENJS provides methods to calculate the difference between two Ethiopian dates.
 
-    ```javascript
+Example: Date Difference
+
+```javascript
     const date1 = qenjs(2017, 1, 1);
     const date2 = qenjs(2017, 13, 5);
     console.log(qenjs.diff(date1, date2)); // Outputs the difference in days, months, or years
     console.log(qenjs.diff(date1, date2, "days")); // Difference in days
-    ```
+```
