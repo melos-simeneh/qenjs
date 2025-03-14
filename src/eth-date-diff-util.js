@@ -244,7 +244,7 @@ function toRelativeTime(
     seconds === 0 &&
     milliseconds === 0
   ) {
-    return isAmharic ? "አሁን" : "Ahun";
+    return isAmharic ? "ተመሳሳይ ጊዜ" : "temesasay gize";
   }
 
   // Find the first non-zero absolute value and return its relative time
@@ -260,7 +260,7 @@ function toRelativeTime(
 
   for (const { value, unit } of timeUnits) {
     if (value > 0) {
-      return formatTime(isFuture, value, unit, withoutSuffix);
+      return formatTime(isFuture, value, unit, withoutSuffix, isAmharic);
     }
   }
 }
@@ -299,22 +299,22 @@ const amharicPrefixes = {
   pastSuffix: "ፊት",
 };
 
-function formatTime(isFuture, value, unit, withoutSuffix, isAmharic = false) {
+function formatTime(isFuture, value, unit, withoutSuffix, isAmharic = true) {
   const timeUnits = isAmharic ? amharicTimeUnits : englishAmharicTimeUnits;
   const prefixes = isAmharic ? amharicPrefixes : englishAmharicPrefixes;
 
   const timeUnit = timeUnits[unit] || unit;
 
-  const timeString = `${value} ${timeUnit}`;
+  const timeString = value > 1 ? ` ${value} ${timeUnit}s` : `${timeUnit}`;
 
   if (withoutSuffix) {
     return timeString;
   }
 
   if (isFuture) {
-    return `${prefixes.future} ${timeString} ${prefixes.futureSuffix}`;
+    return `${prefixes.future}${timeString} ${prefixes.futureSuffix}`;
   } else {
-    return `${prefixes.past} ${timeString} ${prefixes.pastSuffix}`;
+    return `${prefixes.past}${timeString} ${prefixes.pastSuffix}`;
   }
 }
 
@@ -342,8 +342,8 @@ const formatTimeParts = (
   return timeParts.length
     ? timeParts.join(", ")
     : isAmharic
-    ? "ተመሳሳይ ቀን"
-    : "temesasay qen";
+    ? "ተመሳሳይ ጊዜ"
+    : "temesasay gize";
 };
 
 module.exports = { difference, formatTimeParts, toRelativeTime };

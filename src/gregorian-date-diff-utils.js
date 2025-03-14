@@ -156,7 +156,7 @@ const formatTimeParts = ({
       `${milliseconds} millisecond${milliseconds !== 1 ? "s" : ""}`
     );
 
-  return timeParts.length ? timeParts.join(", ") : "They are the same";
+  return timeParts.length ? timeParts.join(", ") : "The same time";
 };
 
 function toRelativeTime(date1, date2, withoutSuffix = false) {
@@ -178,7 +178,7 @@ function toRelativeTime(date1, date2, withoutSuffix = false) {
     seconds === 0 &&
     milliseconds === 0
   ) {
-    return "now";
+    return "The same time";
   }
 
   // Find the first non-zero absolute value and return its relative time

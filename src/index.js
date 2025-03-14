@@ -81,12 +81,12 @@ qenjs.mata = function (...args) {
 qenjs.fromGregorianDate = function (input = new Date()) {
   try {
     let date;
-
     if (typeof input === "string") {
       if (!input.includes("T") && !input.includes(" ")) {
         input += "T00:00:00.000Z";
       }
       date = new Date(input);
+
     } else if (input instanceof Date) {
       date = input;
     } else {
@@ -133,7 +133,7 @@ qenjs.format = function (date, formatString) {
 qenjs.diff = function (date1, date2, unit = "") {
   try {
     if (date1 instanceof EthiopianDate && date2 instanceof EthiopianDate) {
-      return EthiopianDate.difference(date1, date2, unit);
+      return EthiopianDate.diff(date1, date2, unit);
     }
     if (
       (date1 instanceof Date || date1 instanceof GregorianDate) &&
@@ -147,16 +147,20 @@ qenjs.diff = function (date1, date2, unit = "") {
   }
 };
 
-qenjs.diffString = function (date1, date2, unit = "year") {
+qenjs.diffString = function (
+  date1,
+  date2,
+  { unit = "millisecond", useLatin = false } = {}
+) {
   try {
     if (date1 instanceof EthiopianDate && date2 instanceof EthiopianDate) {
-      return EthiopianDate.differenceString(date1, date2, unit);
+      return EthiopianDate.diffString(date1, date2, { unit, useLatin });
     }
     if (
       (date1 instanceof Date || date1 instanceof GregorianDate) &&
       (date2 instanceof Date || date2 instanceof GregorianDate)
     ) {
-      return GregorianDate.differenceString(date1, date2, unit);
+      return GregorianDate.diffString(date1, date2, unit);
     }
     throw new InvalidDateError("Invalid Date");
   } catch (error) {

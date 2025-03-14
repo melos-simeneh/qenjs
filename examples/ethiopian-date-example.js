@@ -2,9 +2,19 @@
 const qenjs = require("../src"); // Make sure your path is correct
 
 // Example 1: Create Ethiopian Date from current date
-const ethiopianDate1 = qenjs();
+const ethiopianDate1 = qenjs(2017, 1, 1);
 console.log("Ethiopian Date (Current Date):", ethiopianDate1.toString()); // Outputs current Ethiopian date
+const new_date = ethiopianDate1.addDays(700);
+console.log(new_date.toString("DDDD, MMMM dd, YYYY")); //
+console.log(new_date.addDays(345).toString("DDDD, MMMM dd, YYYY")); //
+const cc = ethiopianDate1.addMonths(13);
+console.log(cc.toString("DDDD, MMMM dd, YYYY"));
 
+console.log(
+  ethiopianDate1.toString(),
+  cc.toString(),
+  ethiopianDate1.diffString(cc)
+);
 // Example 2: Create Ethiopian Date from a specific date string
 const ethiopianDate2 = qenjs("2017-01-29"); // Create Ethiopian date from Ethiopian Date string
 console.log(
@@ -50,7 +60,10 @@ console.log(
 );
 
 // Example 9: Get relative time from the current date (e.g., "5 years ago")
-console.log("Relative Time (from now):", ethiopianDate3.fromNow());
+console.log(
+  "Relative Time (from now):",
+  ethiopianDate3.fromNow({ useLatin: true })
+);
 
 // Example 10: Calculate the difference between two Ethiopian Dates
 const date1 = qenjs(2017, 1, 1);
@@ -63,15 +76,20 @@ console.log(
 
 console.log(
   "Difference String between 2017-04-15 and 2017-04-15:",
+  qenjs.diffString(date1, date2, { useLatin: true })
+);
+
+console.log(
+  "Difference String between 2017-04-15 and 2017-04-15:",
   qenjs.diffString(date1, date2)
 );
 
-// console.log("Relative Time from today to 2017-04-15:", date1.fromNow());
-// console.log("Relative Time from 2017-04-15 to today:", date1.toNow());
-// console.log("Relative Time from 2017-04-15 to 2017-04-15:", date1.from(date1));
-// console.log("Relative Time between 2017-04-15 and today:", date1.from(date2));
-// console.log("Relative Time between 2017-04-15 and today:", date1.to(date1));
-// console.log("Relative Time between 2017-04-15 and today:", date1.to(date2));
+console.log("Relative Time from today to 2017-04-15:", date1.fromNow());
+console.log("Relative Time from 2017-04-15 to today:", date1.toNow());
+console.log("Relative Time from 2017-04-15 to 2017-04-15:", date1.from(date1));
+console.log("Relative Time between 2017-04-15 and today:", date1.from(date2));
+console.log("Relative Time between 2017-04-15 and today:", date1.to(date1));
+console.log("Relative Time between 2017-04-15 and today:", date1.to(date2));
 
 // console.log(date1.to(date2));
 // console.log(dayjs("2025-01-01").to("2025-01-27"));

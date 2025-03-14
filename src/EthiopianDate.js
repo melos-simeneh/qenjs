@@ -122,7 +122,7 @@ class EthiopianDate {
   }
 
   get Month() {
-    return this.$m;
+    return this.$M;
   }
 
   get Day() {
@@ -191,21 +191,54 @@ class EthiopianDate {
 
   // Add / Subtract Years, Months, Days
   addYears(years) {
-    return new EthiopianDate({ ...this, $y: this.$y + years });
+    this.$y += years;
+    this.$d = this.getGregorianDateTime();
+    this.$W = this.$d.getDay();
+    this.$DWY = this.calculateDayWeekInYear();
+    return this;
   }
-  addMonths(months) {
-    let newMonth = this.$M + months;
-    let newYear = this.$y;
 
-    while (newMonth > 13) {
-      newYear += Math.floor(newMonth / 13);
-      newMonth = newMonth % 13;
+  addMonths(monthsToAdd) {
+    let year = this.$y,
+      month = this.$M,
+      day = this.$D;
+    const monthsInYear = 13;
+    let newMonth = month + monthsToAdd;
+    let newYear = year;
+
+    while (newMonth > monthsInYear) {
+      newMonth -= monthsInYear;
+      newYear += 1;
     }
-    while (newMonth < 1) {
-      newYear -= Math.floor(Math.abs(newMonth) / 13);
-      newMonth = 13 - (Math.abs(newMonth) % 13);
+
+    while (newMonth < 0) {
+      newMonth += monthsInYear;
+      newYear -= 1;
     }
-    return new EthiopianDate({ ...this, $y: newYear, $M: newMonth });
+
+    let newDay = day;
+
+    if (newMonth === 13) {
+      const isLeap = year % 4 === 3;
+      const maxDaysInPagume = isLeap ? 6 : 5;
+
+      if (newDay > maxDaysInPagume) {
+        newDay = maxDaysInPagume;
+      }
+    } else {
+      if (newDay > 30) {
+        newDay = 30;
+      }
+    }
+
+    this.$y = newYear;
+    this.$M = newMonth;
+    this.$D = newDay;
+    this.$d = this.getGregorianDateTime();
+    this.$W = this.$d.getDay();
+    this.$DWM = Math.ceil(this.$D / 8);
+    this.$DWY = this.calculateDayWeekInYear();
+    return this;
   }
 
   addDays(days) {
@@ -336,17 +369,15 @@ class EthiopianDate {
     return new Date(this.$d);
   }
 
-  static difference(date1, date2, unit = "") {
+  static diff(date1, date2, unit = "") {
     if (!(date1 instanceof EthiopianDate && date2 instanceof EthiopianDate))
       return "Invalid Date";
 
     return dateUtils.difference(date1, date2, unit);
   }
-
-  static differenceString(date1, date2, unit) {
+  diffString(date, { unit = "", useLatin = true } = {}) {
     unit = unit.toLowerCase().replace(/s$/, "");
-
-    const result = EthiopianDate.difference(date1, date2, "all");
+    const result = EthiopianDate.diff(this, date, "all");
 
     if (typeof result === "string") {
       return result;
@@ -359,42 +390,63 @@ class EthiopianDate {
     };
 
     if (timeUnitMapping[unit]) {
-      return dateUtils.formatTimeParts(timeUnitMapping[unit]);
+      return dateUtils.formatTimeParts(timeUnitMapping[unit], !useLatin);
     }
 
-    return result.full ? dateUtils.formatTimeParts(result.full) : result;
+    return result.full
+      ? dateUtils.formatTimeParts(result.full, !useLatin)
+      : result;
   }
 
-  diff(date, unit = "") {
-    return EthiopianDate.difference(this, date, unit);
+  static diffString(date1, date2, { unit = "", useLatin = true } = {}) {
+    unit = unit.toLowerCase().replace(/s$/, "");
+    console.log("date1, date2");
+    const result = EthiopianDate.diff(date1, date2, "all");
+
+    if (typeof result === "string") {
+      return result;
+    }
+
+    const timeUnitMapping = {
+      year: result.full,
+      month: result.byMonths,
+      week: result.byWeeks,
+    };
+
+    if (timeUnitMapping[unit]) {
+      return dateUtils.formatTimeParts(timeUnitMapping[unit], !useLatin);
+    }
+
+    return result.full
+      ? dateUtils.formatTimeParts(result.full, !useLatin)
+      : result;
   }
 
-  diffString(date, unit = "") {
-    return EthiopianDate.differenceString(this, date, unit);
-  }
-
-  fromNow(withoutSuffix) {
+  fromNow({ withoutSuffix = false, useLatin = false } = {}) {
     return dateUtils.toRelativeTime(
       this,
-      new EthiopianDate(new Date()),
-      withoutSuffix
+      EthiopianDate.today(),
+      withoutSuffix,
+      !useLatin
     );
   }
-  from(date, withoutSuffix) {
+  from(date, { withoutSuffix = false, useLatin = false } = {}) {
     if (!(date instanceof EthiopianDate)) return "Invalid Date";
-    return dateUtils.toRelativeTime(this, date, withoutSuffix);
+    return dateUtils.toRelativeTime(this, date, withoutSuffix, !useLatin);
   }
-  to(date, withoutSuffix) {
+  to(date, { withoutSuffix = false, useLatin = false } = {}) {
     if (!(date instanceof EthiopianDate)) return "Invalid Date";
-    return dateUtils.toRelativeTime(date, this, withoutSuffix);
+    return dateUtils.toRelativeTime(date, this, withoutSuffix, !useLatin);
   }
-  toNow(withoutSuffix) {
+  toNow({ withoutSuffix = false, useLatin = false } = {}) {
     return dateUtils.toRelativeTime(
-      new EthiopianDate(new Date()),
-      this.$d,
-      withoutSuffix
+      EthiopianDate.today(),
+      this,
+      withoutSuffix,
+      !useLatin
     );
   }
+  static today = () => new EthiopianDate(new Date());
 }
 
 module.exports = EthiopianDate;

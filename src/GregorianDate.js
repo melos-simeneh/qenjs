@@ -129,14 +129,14 @@ class GregorianDate {
     return datetime;
   }
 
-  static difference(date1, date2, unit = "") {
+  static diff(date1, date2, unit = "") {
     date1 = date1 instanceof GregorianDate ? date1.$d : date1;
     date2 = date2 instanceof GregorianDate ? date2.$d : date2;
     return dateUtils.difference(date1, date2, unit);
   }
 
-  static differenceString(date1, date2, unit) {
-    const result = GregorianDate.difference(date1, date2, "all");
+  static diffString(date1, date2, unit) {
+    const result = GregorianDate.diff(date1, date2, "all");
 
     if (typeof result === "string") {
       return result;
@@ -153,13 +153,6 @@ class GregorianDate {
     }
 
     return result.full ? dateUtils.formatTimeParts(result.full) : result;
-  }
-
-  diff(date, unit = "") {
-    return GregorianDate.difference(this.$d, date, unit);
-  }
-  diffString(date, unit = "") {
-    return GregorianDate.differenceString(this.$d, date, unit);
   }
 
   fromNow(withoutSuffix) {
@@ -215,31 +208,31 @@ class GregorianDate {
   }
 
   addDays(days) {
-    const gregorianDate = this.toGregorianDate();
+    const gregorianDate = this.$d;
     gregorianDate.setDate(gregorianDate.getDate() + days);
     return new GregorianDate(gregorianDate);
   }
 
   addHours(hours) {
-    const gregorianDate = this.toGregorianDate();
+    const gregorianDate = this.$d;
     gregorianDate.setHours(gregorianDate.getHours() + hours);
     return new GregorianDate(gregorianDate);
   }
 
   addMinutes(minutes) {
-    const gregorianDate = this.toGregorianDate();
+    const gregorianDate = this.$d;
     gregorianDate.setMinutes(gregorianDate.getMinutes() + minutes);
     return new GregorianDate(gregorianDate);
   }
 
   addSeconds(seconds) {
-    const gregorianDate = this.toGregorianDate();
+    const gregorianDate = this.$d;
     gregorianDate.setSeconds(gregorianDate.getSeconds() + seconds);
     return new GregorianDate(gregorianDate);
   }
 
   addMilliseconds(milliseconds) {
-    const gregorianDate = this.toGregorianDate();
+    const gregorianDate = this.$d;
     gregorianDate.setMilliseconds(
       gregorianDate.getMilliseconds() + milliseconds
     );
