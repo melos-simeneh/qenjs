@@ -1,5 +1,5 @@
 {
-  "name": "qenjs",
+  "name": "qenjs.js",
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
@@ -7,5 +7,26 @@
   },
   "author": "Melos Simeneh Mulu",
   "license": "MIT",
-  "description": "A library to convert and format Ethiopian and Gregorian dates"
+  "description": "A library to convert and format Ethiopian and Gregorian dates",
+  "keywords": [
+    "ethiopian",
+    "ethiopian date",
+    "ethiopian calendar",
+    "date manipulation",
+    "time manipulation",
+    "javascript date",
+    "ethiopian date conversion",
+    "ethiopian time",
+    "date formatting",
+    "gregorian to ethiopian",
+    "ethiopian leap year",
+    "relative time",
+    "date difference",
+    "time calculation",
+    "ethiopian date library",
+    "ethiopian date handling",
+    "qenjs",
+    "ethiopian date library javascript"
+  ]
+
 }

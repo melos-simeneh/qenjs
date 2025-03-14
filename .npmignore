@@ -1,0 +1,26 @@
+# Ignore source files (if not needed in the npm package)
+src/
+
+
+# Ignore the node_modules directory (already excluded by default)
+node_modules/
+
+# Ignore git-related files and folders
+.git/
+.gitignore
+
+# Ignore package-lock.json (optional, it's already in your package.json)
+package-lock.json
+
+# Ignore any build artifacts that are not needed (like .map files or local build directories)
+dist/*.map
+dist/
+
+# Ignore testing files and folders (if present)
+tests/
+test/
+__test__/
+
+# Ignore local environment files
+.env
+.env.local
