@@ -1,6 +1,6 @@
 # QENJS: Ethiopian Date Handling Library
 
-QENJS is a library for working with Ethiopian Dates, providing convenient methods for creating, formatting, manipulating, and converting Ethiopian dates. This README will guide you through various examples and functionalities available in the QENJS library.
+QENJS is a library for working with Ethiopian Dates, providing convenient methods for creating, formatting, manipulating, and converting Ethiopian dates. This README will guide you through various examples and functionalities available in the QENJS library. Check out the live demo of the qenjs: [Qenjs Demo](https://qenjs-ethiopian-date-converter.vercel.app/)
 
 ## Features
 
@@ -136,3 +136,4 @@ Example: Date Difference
     console.log(qenjs.diff(date1, date2)); // Outputs the difference in days, months, or years
     console.log(qenjs.diff(date1, date2, "days")); // Difference in days
 ```
+
