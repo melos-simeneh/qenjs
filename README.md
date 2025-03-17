@@ -137,3 +137,22 @@ Example: Date Difference
     console.log(qenjs.diff(date1, date2, "days")); // Difference in days
 ```
 
+
+## Contributing
+
+We welcome contributions to qenjs! If you'd like to help improve the Ethiopian Date Converter or suggest new features, feel free to fork the repository and submit a pull request.
+
+How to Contribute:
+
+1. Fork the repository.
+2. Create a new branch for your feature or fix.
+3. Make your changes and commit them.
+4. Push to your fork and create a pull request.
+
+Please make sure to follow the coding style and include tests for new features or bug fixes.
+
+## Thank You
+
+Thank you for exploring this repository! Your interest and support mean a lot. I hope this project provides value to you. If you find it useful, feel free to explore the code, report issues, or contribute!
+
+Happy coding! 🚀
