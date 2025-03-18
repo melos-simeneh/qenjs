@@ -27,6 +27,13 @@
     "ethiopian date handling",
     "qenjs",
     "ethiopian date library javascript"
-  ]
-
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/melos-simeneh/qenjs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/melos-simeneh/qenjs/issues"
+  },
+  "homepage": "https://github.com/melos-simeneh/qenjs#readme"
 }
